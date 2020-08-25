@@ -480,7 +480,7 @@ class CalGui:
             rbt2 = ttk.Radiobutton(tl, text = 'F', variable = rt1, value = True)
             rbt1.pack(pady = 15, padx = 5)
             rbt2.pack(pady = 10, padx = 5)
-            top = tl
+            CalGui.TOP = tl
             spb.focus_force()
         else:
             CalGui.TOP.lift()
@@ -526,7 +526,7 @@ class CalGui:
             cbr2 = ttk.Radiobutton(tl, text = 'F', variable = rt2, value = True)
             cbr1.pack(pady = 15, padx = 5)
             cbr2.pack(pady = 10, padx = 5)
-            top = tl
+            CalGui.TOP = tl
             spb2.focus_force()
         else:
             CalGui.TOP.lift()
