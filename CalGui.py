@@ -13,6 +13,7 @@ import calendar as cal
 import pandas as pd
 import datetime as dt
 import time
+from CreateColors import create_colors as cco
 
 class ChoCal:
     """Creating Calendar engine."""
@@ -443,7 +444,6 @@ class CalGui:
     def colorh(self, event = None):
         #Changing color on the highlight and the foreground.
         
-        from cmpsm.CreateColors import create_colors as cco
         import os
         if not CalGui.TOP:    
             if not 'tkcols.txt' in os.listdir():
@@ -488,7 +488,6 @@ class CalGui:
     def calbg(self, event = None):
         #Changing colors for the Calendar background and foreground(the text).
         
-        from cmpsm.CreateColors import create_colors as cco
         import os
         if not CalGui.TOP:
             if not 'tkcols.txt' in os.listdir():
