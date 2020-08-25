@@ -5,4 +5,4 @@
 * **Years set from 1800 - 2300.**
 * **Changes Colors on Highlight and Calendar Backgorund.**
 * **Save event on set date checked.**
-* **Reminder like alarm without sound, but a pop-up Window.**
+* **Reminder like alarm without sound, but a pop-up window.**
