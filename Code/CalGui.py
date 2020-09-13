@@ -13,7 +13,6 @@ import calendar as cal
 import pandas as pd
 import datetime as dt
 import time
-from CreateColors import create_colors as cco
 
 class ChoCal:
     """Creating Calendar engine."""
@@ -30,7 +29,7 @@ class ChoCal:
         cm = [cal.monthcalendar(self.year,i+1) for i in range(12)]            
         monthy = self.month-1
         dayth = self.day
-        mo = list(i for i in list(cal.month_name) if i != '')
+        mo = [i for i in cal.month_name if i != '']
         monthdict = { i:d for i, d in zip(mo,cm)}
         days = list(i for i in list(cal.weekheader(1)) if i != ' ')
         df = pd.DataFrame(monthdict[mo[monthy]],
@@ -78,33 +77,36 @@ class CalGui:
         self.root.geometry(f"+{self.pwidth}+{self.pheight}")
         self.root.overrideredirect(True)
         self.root.config(background = 'teal')
-        
-        self.sc1 = Scale(self.root, from_=1800, to=2300, orient = HORIZONTAL, length = 2293, 
+        self.root.bind_all('<Left>', self.mlr)
+        self.root.bind_all('<Right>', self.mlr)
+        self.root.bind_all('<Up>',self. mlr)
+        self.root.bind_all('<Down>', self.mlr)
+        self.sc1 = Scale(self.root, from_=1800, to=2300, orient = HORIZONTAL, 
                     command = self.ccal, background = 'gold')
         self.sc1.set(dt.datetime.today().year)
-        self.sc1.pack(pady = 5)
-        self.sc2 = Scale(self.root, from_=1, to=12, orient = HORIZONTAL, length = 2293, 
+        self.sc1.pack(pady = 3, padx = 3 , fill = 'both')
+        self.sc2 = Scale(self.root, from_=1, to=12, orient = HORIZONTAL, 
                     command = self.ccal, background = 'gold')
         self.sc2.set(dt.datetime.today().month)
-        self.sc2.pack(pady = 5)
-        self.sc3 = Scale(self.root, from_=1, to=31, orient = HORIZONTAL, length = 2293, 
+        self.sc2.pack(pady = 2, padx = 3 , fill = 'both')
+        self.sc3 = Scale(self.root, from_=1, to=31, orient = HORIZONTAL, 
                     command = self.ccal, background = 'gold')
         self.sc3.set(dt.datetime.today().day)
-        self.sc3.pack(pady = 5)
+        self.sc3.pack(pady = 3, padx = 3 , fill = 'both')
         self.text = Text(self.root, width = 48, height = 8, font = 'courier 20 bold', 
-                    background ='light blue', foreground='indigo', relief = RAISED)
+                    background ='light blue', foreground='indigo', relief = SUNKEN)
         self.text.tag_add('bd', '1.0', END)
         self.text.tag_config('bd', justify = 'center')
         self.text.tag_config('thg', background = 'dark orange', foreground = 'black')
         self.text.tag_config('hg', background = 'dark slate blue', foreground = 'white')
-        self.text.pack(pady = 3)
+        self.text.pack(pady = 2)
         self.gset = IntVar()
         self.cb = Checkbutton(self.root, text = 'Set date', variable = self.gset, command=self.scald,
                          background = 'teal', highlightthickness = 0, bd = 0,
-                         fg = 'blue', activebackground = 'teal', activeforeground = 'white')
+                         fg = 'black', activebackground = 'teal', activeforeground = 'white')
         self.cb.pack(pady = 5)
         self.lvar = StringVar()
-        self.label = ttk.Label(root, textvariable = self.lvar, font = 'times 20 bold', 
+        self.label = ttk.Label(root, textvariable = self.lvar, font = 'verdana 20 bold', 
                           background = 'teal', foreground = 'white' )
         self.label.pack(pady = 5)
         
@@ -118,7 +120,7 @@ class CalGui:
         self.stb = Button(self.frb, text = 'Current Date/Set', command = self.sdat, 
                           bg = 'yellow', fg = 'black', activebackground = 'green', 
                           activeforeground = 'white',highlightthickness = 0, bd = 0)
-        self.stb.pack(side = LEFT)
+        self.stb.pack(side = LEFT, padx=2)
         self.entry = Button(self.frb, text = 'Reminder', command = self.rem, 
                             bg = 'yellow', fg = 'black', activebackground = 'green', 
                             activeforeground = 'white', highlightthickness = 0, bd = 0)
@@ -126,7 +128,7 @@ class CalGui:
         self.cdb = Button(self.frb, text = 'Calculate', command = self.calcd, 
                           bg = 'yellow', fg = 'black', activebackground = 'green', 
                           activeforeground = 'white', highlightthickness = 0, bd = 0)
-        self.cdb.pack(side = LEFT)
+        self.cdb.pack(side = LEFT, padx=2)
         self.stob = Button(self.frb, text = 'Run Color', command = self.colrun, 
                            bg = 'yellow', fg = 'black', activebackground = 'green', 
                            activeforeground = 'white', highlightthickness = 0, bd = 0)
@@ -134,7 +136,7 @@ class CalGui:
         self.recb = Button(self.frb, text = 'Record Set Date', command = self.recdat, 
                          bg = 'yellow', fg = 'black', activebackground = 'green', 
                          activeforeground = 'white', highlightthickness = 0, bd = 0)
-        self.recb.pack(side = LEFT)
+        self.recb.pack(side = LEFT, padx=2)
         self.hcbb = Button(self.frb, text = 'Highlight', command = self.colorh, 
                            bg = 'yellow', fg = 'black', activebackground = 'green', 
                            activeforeground = 'white', highlightthickness = 0, bd = 0)
@@ -142,20 +144,35 @@ class CalGui:
         self.clbcb = Button(self.frb, text = 'Cal Bg Color', command = self.calbg, 
                             bg = 'yellow', fg = 'black', activebackground = 'green', 
                             activeforeground = 'white', highlightthickness = 0, bd = 0)
-        self.clbcb.pack(side = LEFT)
+        self.clbcb.pack(side = LEFT, padx=2)
         self.setb = Button(self.frb, text = 'Saving Colors', command = self.savs, 
                            bg = 'yellow', fg = 'black', activebackground = 'green', 
                            activeforeground = 'white', highlightthickness = 0, bd = 0)
         self.setb.pack(side = LEFT)
         self.but = Button(self.frb, text = 'Close', command = root.destroy, 
                          bg = 'blue', fg = 'white', activebackground = 'black', 
-                         activeforeground = 'white',highlightthickness = 0, bd = 0)
+                         activeforeground = 'white',highlightthickness = 1, bd = 0)
         self.but.pack(side = LEFT)
         
+    def mlr(self, event = None):
+        if not CalGui.TOP:
+            if event.keysym == 'Left':
+                self.pwidth = self.pwidth - 10
+                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+            elif event.keysym == 'Right':
+                self.pwidth = self.pwidth + 10
+                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+            elif event.keysym == 'Down':
+                self.pheight = self.pheight + 10
+                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+            elif event.keysym == 'Up':
+                self.pheight = self.pheight - 10
+                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+            
     def ccal(self, event = None):
         #Creating Calendar according to the scales of the years, months and days.
         
-        self.label.config(font = 'times 20 bold')
+        self.label.config(font = 'verdana 20 bold')
         cc = ChoCal(self.sc1.get(), self.sc2.get(), self.sc3.get())
         self.sc3.config(to = cc.monrang(self.sc1.get(), self.sc2.get()))
         self.text.config(state = 'normal')
@@ -255,7 +272,7 @@ class CalGui:
     def scald(self, event = None):
         #Setting year, month and day as default on set date check button.
          
-        self.label.config(font = 'times 20 bold')
+        self.label.config(font = 'verdana 20 bold')
         if self.gset.get():
             self.sd.clear()
             self.sd.extend((self.sc1.get(), self.sc2.get(), self.sc3.get()))        
@@ -287,7 +304,7 @@ class CalGui:
         
         import os
         dirc = os.getcwd()
-        if 'Caldata' == dirc[dirc.rfind("/")+1:]:
+        if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
             file = simpledialog.askstring('CalGui', 'File name create?')
             if file:
                 if f'{file}.txt' in os.listdir():
@@ -320,19 +337,19 @@ class CalGui:
         
         import os
         dirc = os.getcwd()
-        if 'Caldata' == dirc[dirc.rfind("/")+1:]:
+        if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
             fi = ''
             files = [i for i in os.listdir() if '.' in i]
             if files:
                 for fil in range(len(files)):
-                    fi += ''.join(f'{fil+1}: {files[fil]}\n')
-                file = simpledialog.askinteger('CalGui', f'Choose File:\n{fi}')
+                    fi += ''.join(f'{fil+1}: {files[fil][:-4]}\n')
+                file = simpledialog.askinteger('CalGui', f'Choose Folder:\n{fi[:-1]}')
                 if file  and file <= len(files):
                     o=''
                     with open(f'{files[file-1]}', 'r') as rd:
                         lg = rd.readlines()
                         for i,j in enumerate(lg):
-                            o+=''.join(f'\n{i+1}:{eval(j[:-1])[1]}')
+                            o+=''.join(f'\n{i+1}: {eval(j[:-1])[1]}')
                     chdat = simpledialog.askinteger('CalGui', f'There are {o}\nrecords, choose:')
                     if chdat:
                         if chdat <= len(lg):
@@ -396,7 +413,7 @@ class CalGui:
         
         if CalGui.SELF:
             CalGui.SELF = False
-            self.label.config(font = 'times 15 bold')
+            self.label.config(font = 'verdana 15 bold')
             if self.sd:
                 de = dt.date(self.sc1.get(), 
                 self.sc2.get(), self.sc3.get()) - dt.date(self.sd[0], 
@@ -432,18 +449,19 @@ class CalGui:
                     else:
                         self.lvar.set(f"{td} day left.")
             else:
-                self.label.config(font = 'times 20 bold')
+                self.label.config(font = 'verdana 20 bold')
                 messagebox.showinfo('CalGui', 'No days left!')
             
         else:
             CalGui.SELF = True
-            self.label.config(font = 'times 20 bold')
+            self.label.config(font = 'verdana 20 bold')
             self.lvar.set(self.cald())
             
 
     def colorh(self, event = None):
         #Changing color on the highlight and the foreground.
         
+        from CreateColors import create_colors as cco
         import os
         if not CalGui.TOP:    
             if not 'tkcols.txt' in os.listdir():
@@ -471,10 +489,11 @@ class CalGui:
             
             tl = Toplevel()
             tl.overrideredirect(True)
+            tl.bind_all("<q>",chc)
+            tl.bind_all("<Q>",chc)            
             spb = Spinbox(tl, command= high, values=lc, 
                           font=Font(family='Helvetica', size=20, weight='bold'))
             spb.pack(side = LEFT, padx = 5)
-            spb.bind("<q>",chc)
             rt1 = BooleanVar()
             rbt1 = ttk.Radiobutton(tl, text = 'H', variable = rt1, value = False)
             rbt2 = ttk.Radiobutton(tl, text = 'F', variable = rt1, value = True)
@@ -488,6 +507,7 @@ class CalGui:
     def calbg(self, event = None):
         #Changing colors for the Calendar background and foreground(the text).
         
+        from CreateColors import create_colors as cco
         import os
         if not CalGui.TOP:
             if not 'tkcols.txt' in os.listdir():
@@ -516,10 +536,11 @@ class CalGui:
             
             tl = Toplevel()
             tl.overrideredirect(True)
+            tl.bind_all("<q>",chc)
+            tl.bind_all("<Q>",chc)            
             spb2 = Spinbox(tl, values = lc, command= clc, font=Font(family='Helvetica', 
                            size=20, weight='bold'))
             spb2.pack(side = LEFT, padx = 5)
-            spb2.bind("<q>",chc)
             rt2 = BooleanVar()
             cbr1 = ttk.Radiobutton(tl, text = 'B', variable = rt2, value = False)
             cbr2 = ttk.Radiobutton(tl, text = 'F', variable = rt2, value = True)
@@ -544,17 +565,17 @@ class CalGui:
         ask = messagebox.askyesno('CalGui', 'Save setting color?')
         if ask:
             if 'stc.txt' in os.listdir():
-                ask = messagebox.askyesno('CalGui', 'Overwrite existing setting?')
+                ask = messagebox.askyesno('CalGui', 'Adding more setting?')
                 if ask:
                     std = {}
-                    with open('stc.txt', 'w') as sett:
+                    with open('stc.txt', 'a') as sett:
                         std = {'Highlight': self.text.tag_cget("hg","background"),
                                'Foreground': self.text.tag_cget("hg","foreground"),
                                'Label': str(self.label.cget('foreground')),
                                'CB': str(self.text.cget('background')),
                                'CF': str(self.text.cget('foreground'))
                                }
-                        sett.write(f'{std}')
+                        sett.write(f'{std}\n')
                 else:
                     messagebox.showinfo('CalGui', 'Saving setting aborted!')
             else:
@@ -566,15 +587,22 @@ class CalGui:
                            'CB': str(self.text.cget('background')),
                            'CF': str(self.text.cget('foreground'))
                            }
-                    sett.write(f'{std}')
+                    sett.write(f'{std}\n')
         else:
             if 'stc.txt' in os.listdir():
                 ask = messagebox.askyesno('CalGui', '"Yes" set color, and "No" to delete setting!')
                 if ask:
-                    std = dict()
                     with open('stc.txt') as sett:
-                        rd = sett.read()
-                        std = eval(rd)
+                        rd = sett.readlines()
+                    if len(rd)>1:
+                        msg = f'There are {len(rd)} Color Settings, choose 1 to {len(rd)}:'
+                        setget = simpledialog.askinteger('CalGui', msg)
+                        if setget:
+                            std = eval(rd[setget-1])
+                        else:
+                            std = eval(rd[len(rd)-1])
+                    else:
+                        std = eval(rd[0])
                     
                     self.text.tag_config('hg', background = std['Highlight'], 
                                          foreground= std['Foreground'])
@@ -582,7 +610,24 @@ class CalGui:
                     self.label.config(foreground = std['Label'])
                     
                 else:
-                    os.remove('stc.txt')
+                    with open('stc.txt') as sett:
+                        rd = sett.readlines()
+                    if len(rd)>1:
+                        msg = f'There are {len(rd)} Color Settings, choose 1 to {len(rd)}:'
+                        setget = simpledialog.askinteger('Delete setting!', msg)
+                        if setget:
+                            del rd[setget-1]
+                            with open('stc.txt', 'w') as sett:
+                                sett.writelines(rd)
+                        else:
+                            messagebox.showinfo('Deletion', 'Aborted!')
+                    else:
+                        msg = 'This will delete the setting file as well, are you sure?'        
+                        ask = messagebox.askyesno('Deelete setting!', msg)
+                        if ask:
+                            os.remove('stc.txt')
+                        else:
+                            messagebox.showinfo('Deletion', 'Aborted!')
             else:
                 messagebox.showinfo('CalGui', 'No colors saved yet!')
         os.chdir(dirc)
@@ -598,6 +643,29 @@ def main():
         os.chdir('Caldata')
     root =  Tk()
     start = CalGui(root)
+    lcs = '''
+Copyright (c) 2008-2011, AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team All rights reserved. 
+
+Copyright (c) 2011-2020, Open source contributors. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+    * Redistributions of source code must retain the above
+      copyright notice, this list of conditions and the following
+      disclaimer.
+      
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the
+      following disclaimer in the documentation and/or
+      other materials provided with the distribution. 
+    
+    * Neither the name of the copyright holder nor the names
+      of its contributors may be used to endorse or promote
+      products derived from this software without specific
+      prior written permission. 
+    
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'''
+    root.update()
+    messagebox.showinfo('License Notification',lcs)    
     root.mainloop()
 
 if __name__ == "__main__":
