@@ -644,7 +644,8 @@ def main():
     root =  Tk()
     start = CalGui(root)
 #THIS LICENSE NOTICE IS FOR THE PURPOSE OF BUILDING AN EXE FILE, AS PANDAS SOURCE CODES ARE INCLUDED IN THIS APPLICATION.
-#    lcs = '''
+#    lcs = '''Pandas under BSD 3-Clause License
+                            
 #Copyright (c) 2008-2011, AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team All rights reserved.
 #
 #Copyright (c) 2011-2020, Open source contributors. 
