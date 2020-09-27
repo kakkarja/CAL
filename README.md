@@ -6,3 +6,4 @@
 * **Changes Colors on Highlight and Calendar Backgorund.**
 * **Save event on set date checked.**
 * **Reminder like alarm without sound, but a pop-up window.**
+* **User need to download Pandas first for this app to work. [https://github.com/pandas-dev/pandas]**
