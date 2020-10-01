@@ -1,0 +1,1 @@
+{"stc": [{"Highlight": "dark slate gray", "Foreground": "light yellow", "Label": "#9ff6f7", "CB": "dark slate gray", "CF": "powder blue"}, {"Highlight": "midnight blue", "Foreground": "yellow", "Label": "#f3f01e", "CB": "midnight blue", "CF": "spring green"}]}
