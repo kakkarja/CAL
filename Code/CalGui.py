@@ -368,6 +368,7 @@ class CalGui:
                         if ev:
                             with open(f'{file}.txt', 'a') as wr:
                                 wr.write(f'{(self.sd, ev)}\n')
+                            self.setcb()
                         else:
                             messagebox.showinfo('CalGui', 'Must write event!')
                     else:
@@ -378,6 +379,7 @@ class CalGui:
                         if ev:
                             with open(f'{file}.txt', 'w') as wr:
                                 wr.write(f'{(self.sd, ev)}\n')
+                            self.setcb()
                         else:
                             messagebox.showinfo('CalGui', 'Must write event!')
                     else:
@@ -429,23 +431,21 @@ class CalGui:
                                 lg = rd.readlines()
                             chdat = eval(ev.get()[:ev.get().find(':')])
                             if self.gset.get():
-                                self.gset.set(0)
-                                self.scald()
+                                self.setcb()
                             self.sd = eval(lg[chdat-1][:-1])[0]
                             self.sc3.config(to = ChoCal.monrang(self.sd[0], self.sd[1]))
                             self.gset.set(1)
                             self.sdat()
-                            self.gset.set(0)
-                            self.scald()
+                            self.setcb()
                             y, m, d =eval(lg[chdat-1][:-1])[0]
-                            messagebox.showinfo(f'{self.txfile[:-4]}: {dt.date(y,m,d)}',
-                                                f'{eval(lg[chdat-1][:-1])[1]}')                                
                             for i in self.bt:
                                 if isinstance(self.bt[i], tuple):
                                     self.bt[i][0].config(state = 'disable')
                                     self.bt[i][0].unbind_all(self.bt[i][1])
                                 else:
                                     self.bt[i].config(state = 'disable')
+                            messagebox.showinfo(f'{self.txfile[:-4]}: {dt.date(y,m,d)}',
+                                                f'{eval(lg[chdat-1][:-1])[1]}')                            
                         else:
                             ask = messagebox.askyesno('CalGui', '"Yes"Remove event, "No" remove file')
                             if ask:
