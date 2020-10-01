@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 # Author ideas from KarJa, with many helps from StackOverflow, GeeksforGeeks, and many more.
 # Sorry i cannot mention all, as i move along building this app, i looked up in website, 
 # and did not save the website. 
 # Many apologize from me. 
 # Thank you all so much for all, for your dedication making website the source of sharing.
-# I dedicate this app as well for learning and free to be use and copied for better. 
+# I dedicate this app as well for learning and free to be use and copied for better.
+# Copyright © kakkarja (K A K)
 
 from tkinter import *
 from tkinter import ttk
 from tkinter import simpledialog, messagebox
-from tkinter.font import Font
 import calendar as cal
 import pandas as pd
 import datetime as dt
@@ -31,11 +32,11 @@ class ChoCal:
         dayth = self.day
         mo = [i for i in cal.month_name if i != '']
         monthdict = { i:d for i, d in zip(mo,cm)}
-        days = list(i for i in list(cal.weekheader(1)) if i != ' ')
+        days = cal.weekheader(2).split()
         df = pd.DataFrame(monthdict[mo[monthy]],
         index = [f'Week {i+1}' for i in range(len(monthdict[mo[monthy]]))],
         columns= days)
-        df = df.replace(0, ' ')
+        df = df.replace(0, '')
         df.index.name = f'{mo[monthy]} {self.year}'
         return df
 
@@ -68,8 +69,8 @@ class CalGui:
         self.root = root
         self.sd = []
         self.rdr =[]
+        self.txfile =''
         
-        #This geometry is to set fit in my tablet, which div by 17.
         self.wwidth = self.root.winfo_reqwidth()
         self.wheight = self.root.winfo_reqheight()
         self.pwidth = int(self.root.winfo_screenwidth()/17 - self.wwidth/17)
@@ -81,80 +82,112 @@ class CalGui:
         self.root.bind_all('<Right>', self.mlr)
         self.root.bind_all('<Up>',self. mlr)
         self.root.bind_all('<Down>', self.mlr)
+        self.root.bind_all('<Control-Left>', self.mtc)
+        self.root.bind_all('<Control-Right>', self.mtc)
+        self.root.bind_all('<Shift-Left>', self.dtc)
+        self.root.bind_all('<Shift-Right>', self.dtc)
+        self.root.bind_all('<Alt-Left>', self.yrc)
+        self.root.bind_all('<Alt-Right>', self.yrc)
+        self.bt = {}
         self.sc1 = Scale(self.root, from_=1800, to=2300, orient = HORIZONTAL, 
                     command = self.ccal, background = 'gold')
         self.sc1.set(dt.datetime.today().year)
         self.sc1.pack(pady = 3, padx = 3 , fill = 'both')
+        self.bt['sc1'] = self.sc1
         self.sc2 = Scale(self.root, from_=1, to=12, orient = HORIZONTAL, 
                     command = self.ccal, background = 'gold')
         self.sc2.set(dt.datetime.today().month)
         self.sc2.pack(pady = 2, padx = 3 , fill = 'both')
+        self.bt['sc2'] = self.sc2
         self.sc3 = Scale(self.root, from_=1, to=31, orient = HORIZONTAL, 
                     command = self.ccal, background = 'gold')
         self.sc3.set(dt.datetime.today().day)
         self.sc3.pack(pady = 3, padx = 3 , fill = 'both')
-        self.text = Text(self.root, width = 48, height = 8, font = 'courier 20 bold', 
-                    background ='light blue', foreground='indigo', relief = SUNKEN)
+        self.bt['sc3'] = self.sc3
+        self.text = Text(self.root, font = 'courier 20 bold', width = 48, height = 8, background ='light blue', foreground='indigo', relief = SUNKEN)
         self.text.tag_add('bd', '1.0', END)
         self.text.tag_config('bd', justify = 'center')
         self.text.tag_config('thg', background = 'dark orange', foreground = 'black')
         self.text.tag_config('hg', background = 'dark slate blue', foreground = 'white')
-        self.text.pack(pady = 2)
+        self.text.pack(pady = 2, fill = 'x')
+        self.bt['text'] = self.text
         self.gset = IntVar()
         self.cb = Checkbutton(self.root, text = 'Set date', variable = self.gset, command=self.scald,
                          background = 'teal', highlightthickness = 0, bd = 0,
                          fg = 'black', activebackground = 'teal', activeforeground = 'white')
+        self.cb.bind_all('<Control-k>', self.setcb)
         self.cb.pack(pady = 5)
+        self.bt['cb'] = (self.cb, '<Control-k>', self.setcb)
         self.lvar = StringVar()
         self.label = ttk.Label(root, textvariable = self.lvar, font = 'verdana 20 bold', 
                           background = 'teal', foreground = 'white' )
         self.label.pack(pady = 5)
-        
         self.frb = ttk.Frame(self.root)
         self.frb.pack(pady = 7)
         self.lb = Button(self.frb, text = 'Load Set Date', command = self.loaddat, 
                          bg = 'yellow', fg = 'black',
                          activebackground = 'green', activeforeground = 'white',
                          highlightthickness = 0, bd = 0)
+        self.lb.bind_all('<Control-l>', self.loaddat)
         self.lb.pack(side = LEFT)
+        self.bt['lb'] = (self.lb, '<Control-l>', self.loaddat)
         self.stb = Button(self.frb, text = 'Current Date/Set', command = self.sdat, 
                           bg = 'yellow', fg = 'black', activebackground = 'green', 
                           activeforeground = 'white',highlightthickness = 0, bd = 0)
+        self.stb.bind_all('<Control-c>', self.sdat)
         self.stb.pack(side = LEFT, padx=2)
+        self.bt['stb'] = (self.stb, '<Control-c>', self.sdat)
         self.entry = Button(self.frb, text = 'Reminder', command = self.rem, 
                             bg = 'yellow', fg = 'black', activebackground = 'green', 
                             activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.entry.bind_all('<Control-m>', self.rem)
         self.entry.pack(side = LEFT)
+        self.bt['entry'] = (self.entry, '<Control-m>', self.rem)
         self.cdb = Button(self.frb, text = 'Calculate', command = self.calcd, 
                           bg = 'yellow', fg = 'black', activebackground = 'green', 
                           activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.cdb.bind_all('<Control-equal>', self.calcd)
         self.cdb.pack(side = LEFT, padx=2)
+        self.bt['cdb'] = (self.cdb, '<Control-equal>', self.calcd)
         self.stob = Button(self.frb, text = 'Run Color', command = self.colrun, 
                            bg = 'yellow', fg = 'black', activebackground = 'green', 
                            activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.stob.bind_all('<Control-r>', self.colrun)
         self.stob.pack(side = LEFT)
+        self.bt['stob'] = (self.stob, '<Control-r>', self.colrun)
         self.recb = Button(self.frb, text = 'Record Set Date', command = self.recdat, 
                          bg = 'yellow', fg = 'black', activebackground = 'green', 
                          activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.recb.bind_all('<Control-e>', self.recdat)
         self.recb.pack(side = LEFT, padx=2)
+        self.bt['recb'] = (self.recb, '<Control-e>', self.recdat)
         self.hcbb = Button(self.frb, text = 'Highlight', command = self.colorh, 
                            bg = 'yellow', fg = 'black', activebackground = 'green', 
                            activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.hcbb.bind_all('<Control-h>', self.colorh)
         self.hcbb.pack(side = LEFT)
+        self.bt['hcbb'] = (self.hcbb, '<Control-h>', self.colorh)
         self.clbcb = Button(self.frb, text = 'Cal Bg Color', command = self.calbg, 
                             bg = 'yellow', fg = 'black', activebackground = 'green', 
                             activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.clbcb.bind_all('<Control-b>', self.calbg)
         self.clbcb.pack(side = LEFT, padx=2)
+        self.bt['clbcb'] = (self.clbcb, '<Control-b>', self.calbg)
         self.setb = Button(self.frb, text = 'Saving Colors', command = self.savs, 
                            bg = 'yellow', fg = 'black', activebackground = 'green', 
                            activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.setb.bind_all('<Control-s>', self.savs)
         self.setb.pack(side = LEFT)
-        self.but = Button(self.frb, text = 'Close', command = root.destroy, 
+        self.bt['setb'] = (self.setb, '<Control-s>', self.savs)
+        self.but = Button(self.frb, text = 'Close', command = self.root.destroy, 
                          bg = 'blue', fg = 'white', activebackground = 'black', 
                          activeforeground = 'white',highlightthickness = 1, bd = 0)
         self.but.pack(side = LEFT)
+        self.bt['but'] = self.but
         
     def mlr(self, event = None):
+        # Moving the app's window to any position on the screen.
+        
         if not CalGui.TOP:
             if event.keysym == 'Left':
                 self.pwidth = self.pwidth - 10
@@ -168,6 +201,36 @@ class CalGui:
             elif event.keysym == 'Up':
                 self.pheight = self.pheight - 10
                 self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+                
+    def dtc(self, event = None):
+        # Moving the scale of the day.
+        
+        if event.keysym == 'Right':
+            ad = self.sc3.get()+1
+            self.sc3.set(ad)
+        else:
+            ad = self.sc3.get()-1
+            self.sc3.set(ad)
+            
+    def mtc(self, event = None):
+        # Moving the scale of the month.
+        
+        if event.keysym == 'Right':
+            ad = self.sc2.get()+1
+            self.sc2.set(ad)
+        else:
+            ad = self.sc2.get()-1
+            self.sc2.set(ad)
+            
+    def yrc(self, event = None):
+        # Moving the scale of the year.
+        
+        if event.keysym == 'Right':
+            ad = self.sc1.get()+1
+            self.sc1.set(ad)
+        else:
+            ad = self.sc1.get()-1
+            self.sc1.set(ad)    
             
     def ccal(self, event = None):
         #Creating Calendar according to the scales of the years, months and days.
@@ -179,20 +242,11 @@ class CalGui:
         self.text.delete('1.0', END)
         self.text.insert(END, cc.createcal(), 'bd')
         self.tdcol()
-        sch1 = self.text.search(str(self.sc3.get()),'3.0',END)
-        while True:        
-            if int(sch1[sch1.index('.')+1:]) > 6: 
-                if len(str(self.sc3.get())) > 1:
-                    sch2 = f"{sch1[:sch1.index('.')]}.{str(eval(sch1[sch1.index('.')+1:])+2)}"
-                    break
-                else:
-                    sch2 = f"{sch1[:sch1.index('.')]}.{str(eval(sch1[sch1.index('.')+1:])+1)}"
-                    break
-            adn = f"{sch1[:sch1.index('.')]}.{str(eval(sch1[sch1.index('.')+1:])+1)}"
-            sch1 = self.text.search(str(self.sc3.get()),adn,END)
+        sch1 = self.text.search(str(self.sc3.get()),'3.6',END)
+        sch2 = f'{sch1}+{len(str(self.sc3.get()))}c'
         gt = self.text.get(sch1,sch2)
         self.text.delete(sch1, sch2)
-        self.text.insert(sch1,gt, ('hg'))
+        self.text.insert(sch1, gt, ('hg'))
         self.text.config(state = 'disabled')
         if self.cald():
             self.lvar.set(self.cald())
@@ -203,22 +257,13 @@ class CalGui:
         #Highlight Color of today's date.
         
         if self.sc2.get() == dt.date.today().month and self.sc1.get() == dt.date.today().year:
-            sch1 = self.text.search(str(dt.datetime.today().day),'3.0',END)
-            while True:        
-                if int(sch1[sch1.index('.')+1:]) > 6: 
-                    if len(str(dt.datetime.today().day)) > 1:
-                        sch2 = f"{sch1[:sch1.index('.')]}.{str(eval(sch1[sch1.index('.')+1:])+2)}"
-                        break
-                    else:
-                        sch2 = f"{sch1[:sch1.index('.')]}.{str(eval(sch1[sch1.index('.')+1:])+1)}"
-                        break
-                adn = f"{sch1[:sch1.index('.')]}.{str(eval(sch1[sch1.index('.')+1:])+1)}"
-                sch1 = self.text.search(str(dt.datetime.today().day),adn,END)
+            sch1 = self.text.search(str(dt.datetime.today().day),'3.6',END)
+            sch2 = f'{sch1}+{len(str(dt.datetime.today().day))}c'
             gt = self.text.get(sch1,sch2)
             self.text.delete(sch1, sch2)
             self.text.insert(sch1,gt, ('thg'))
     
-    def cald(self):
+    def cald(self, event = None):
         #Calculation between two dates for how many days left.
         
         if self.sd:
@@ -262,6 +307,7 @@ class CalGui:
     def colrun(self, event = None):
         #Dedicated button for running random color on the seconds running
         
+        self.sdat()
         if CalGui.RUN:
             self.stob.configure(text = 'Run Color')
             CalGui.RUN = False
@@ -269,6 +315,15 @@ class CalGui:
             self.stob.configure(text = 'Stop Color')
             CalGui.RUN = True
 
+    def setcb(self, event = None):
+        # This for key event binding only. On checkbox set date.
+        
+        if not self.gset.get():
+            self.gset.set(1)
+        else:
+            self.gset.set(0)
+        self.scald()
+        
     def scald(self, event = None):
         #Setting year, month and day as default on set date check button.
          
@@ -286,8 +341,8 @@ class CalGui:
                 self.lvar.set(self.cald())
             else:
                 self.tn()
-
-    def sdat(self):
+                
+    def sdat(self, event = None):
         #Set the scale to default values of year, month and day.
         
         if self.gset.get():
@@ -330,29 +385,49 @@ class CalGui:
             else:
                 messagebox.showwarning('CalGui', 'Saving Event aborted!')
         else:
-            messagebox.showwarning('CalGui', 'Nothing found!!!')     
-
+            messagebox.showwarning('CalGui', 'Nothing found!!!')
+            
     def loaddat(self, event = None):
         #Load a date base on the event that has been saved.
         
-        import os
-        dirc = os.getcwd()
-        if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
-            fi = ''
-            files = [i for i in os.listdir() if '.' in i]
-            if files:
-                for fil in range(len(files)):
-                    fi += ''.join(f'{fil+1}: {files[fil][:-4]}\n')
-                file = simpledialog.askinteger('CalGui', f'Choose Folder:\n{fi[:-1]}')
-                if file  and file <= len(files):
-                    o=''
-                    with open(f'{files[file-1]}', 'r') as rd:
-                        lg = rd.readlines()
-                        for i,j in enumerate(lg):
-                            o+=''.join(f'\n{i+1}: {eval(j[:-1])[1]}')
-                    chdat = simpledialog.askinteger('CalGui', f'There are {o}\nrecords, choose:')
-                    if chdat:
-                        if chdat <= len(lg):
+        if CalGui.TOP is None:
+            import os
+            dirc = os.getcwd()
+            if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
+                fi = ''
+                files = [i for i in os.listdir() if '.' in i]
+                if files:
+                    def chosenfile(event = None):
+                        if ev.get():
+                            o=[]
+                            self.txfile = ev.get()
+                            with open(f'{self.txfile}', 'r') as rd:
+                                lg = rd.readlines()
+                            for i,j in enumerate(lg):
+                                o.append(f'{i+1}: {eval(j[:-1])[1]}')
+                            cbbx.config(state = 'normal')
+                            cbbx.delete(0,END)
+                            cbbx['values'] = o
+                            cbbx.current(0)
+                            cbbx.config(state = 'readonly')
+                            butcho.config(state = 'disable')
+                            tl.unbind_all('<c>')
+                            buteve.config(state = 'normal')
+                            tl.bind_all('<c>', chosenevent)
+                            
+                    def chosenevent(event = None):
+                        ask = messagebox.askyesno('CalGui', '"Yes" show event date, "No" delete event/file')
+                        if ask:
+                            for i in self.bt:
+                                if isinstance(self.bt[i], tuple):
+                                    self.bt[i][0].config(state = 'normal')
+                                    self.bt[i][0].bind_all(self.bt[i][1], self.bt[i][2])
+                                else:
+                                    if i != 'text':
+                                        self.bt[i].config(state = 'normal')                            
+                            with open(f'{self.txfile}', 'r') as rd:
+                                lg = rd.readlines()
+                            chdat = eval(ev.get()[:ev.get().find(':')])
                             if self.gset.get():
                                 self.gset.set(0)
                                 self.scald()
@@ -362,27 +437,119 @@ class CalGui:
                             self.sdat()
                             self.gset.set(0)
                             self.scald()
-                            y, m, d =eval(lg[chdat-1][:-1])[0]  
-                            messagebox.showinfo(f'{files[file-1][:-4]}: {dt.date(y,m,d)}',
-                                                f'{eval(lg[chdat-1][:-1])[1]}')
+                            y, m, d =eval(lg[chdat-1][:-1])[0]
+                            messagebox.showinfo(f'{self.txfile[:-4]}: {dt.date(y,m,d)}',
+                                                f'{eval(lg[chdat-1][:-1])[1]}')                                
+                            for i in self.bt:
+                                if isinstance(self.bt[i], tuple):
+                                    self.bt[i][0].config(state = 'disable')
+                                    self.bt[i][0].unbind_all(self.bt[i][1])
+                                else:
+                                    self.bt[i].config(state = 'disable')
                         else:
-                            messagebox.showwarning('CalGui', 'No such Record!!!')
-                    else:
-                        chdat = simpledialog.askinteger('CalGui', f'Delete, {o}\nrecords, choose:')
-                        if chdat:
-                            del lg[chdat-1]
-                            with open(f'{files[file-1]}', 'w') as wr:
-                                wr.writelines(lg)
-                        else:
-                            ask = messagebox.askyesno('CalGui', 'Remove Records?')
+                            ask = messagebox.askyesno('CalGui', '"Yes"Remove event, "No" remove file')
                             if ask:
-                                os.remove(f'{files[file-1]}')
+                                with open(f'{self.txfile}', 'r') as rd:
+                                    lg = rd.readlines()
+                                if lg:
+                                    chdat = eval(ev.get()[:ev.get().find(':')])
+                                    del lg[chdat-1]
+                                    if lg:
+                                        o = []
+                                        for i,j in enumerate(lg):
+                                            o.append(f'{i+1}: {eval(j[:-1])[1]}')
+                                        cbbx.config(state = 'normal')
+                                        cbbx.delete(0,END)
+                                        cbbx['values'] = o
+                                        cbbx.current(0)
+                                        cbbx.config(state = 'readonly')                                
+                                        with open(f'{self.txfile}', 'w') as wr:
+                                            wr.writelines(lg)
+                                    else:
+                                        try:
+                                            os.remove(f'{self.txfile}')
+                                            files = [i for i in os.listdir() if '.' in i]
+                                            cbbx.config(state = 'normal')
+                                            cbbx.delete(0,END)
+                                            cbbx['values'] = files
+                                            cbbx.current(0)
+                                            cbbx.config(state = 'readonly')                                
+                                            buteve.config(state = 'disable')
+                                            tl.unbind_all('<c>')
+                                            butcho.config(state = 'normal')
+                                            tl.bind_all('<c>', chosenfile)
+                                        except:
+                                            chc()                                        
+                            else:
+                                try:
+                                    os.remove(f'{self.txfile}')
+                                    files = [i for i in os.listdir() if '.' in i]
+                                    cbbx.config(state = 'normal')
+                                    cbbx.delete(0,END)
+                                    cbbx['values'] = files
+                                    cbbx.current(0)
+                                    cbbx.config(state = 'readonly')                                
+                                    buteve.config(state = 'disable')
+                                    tl.unbind_all('<c>')
+                                    butcho.config(state = 'normal')
+                                    tl.bind_all('<c>', chosenfile)
+                                except:
+                                    chc()
+                                    
+                    def chc(event = None):
+                        CalGui.TOP = None
+                        tl.unbind_all("<q>")
+                        tl.unbind_all("<Q>")
+                        tl.unbind_all('<f>')
+                        tl.unbind_all('<c>')
+                        for i in self.bt:
+                            if isinstance(self.bt[i], tuple):
+                                self.bt[i][0].config(state = 'normal')
+                                self.bt[i][0].bind_all(self.bt[i][1], self.bt[i][2])
+                            else:
+                                if i != 'text':
+                                    self.bt[i].config(state = 'normal')             
+                        tl.destroy()
+                        
+                    def cbf(event = None):
+                        cbbx.focus_set()
+                            
+                    for i in self.bt:
+                        if isinstance(self.bt[i], tuple):
+                            self.bt[i][0].config(state = 'disable')
+                            self.bt[i][0].unbind_all(self.bt[i][1])
+                        else:
+                            self.bt[i].config(state = 'disable')
+                    tl = Toplevel()
+                    tl.resizable(False, False)
+                    tl.wm_attributes("-topmost", 1)
+                    tl.title('Choose Event')
+                    tl.overrideredirect(True)
+                    tl.bind_all("<q>",chc)
+                    tl.bind_all("<Q>",chc)
+                    tl.bind_all('<c>', chosenfile)
+                    label = Label(tl, text = 'Please select recorded event')
+                    label.pack(pady = 5)
+                    ev = StringVar()
+                    cbbx = ttk.Combobox(tl, textvariable = ev, font= 'Helvetica 12 bold')
+                    cbbx['values'] = files
+                    cbbx.current(0)
+                    cbbx.config(state = 'readonly')
+                    cbbx.pack(padx = 5)
+                    tl.bind_all('<f>', cbf)
+                    fr = Frame(tl)
+                    fr.pack()
+                    butcho = Button(fr, text = 'Choose File', command = chosenfile)
+                    butcho.pack(side = LEFT, pady = 5)
+                    buteve = Button(fr, text = 'Choose event', command = chosenevent)
+                    buteve.pack(side = RIGHT, pady = 5)
+                    buteve.config(state = 'disable')
+                    CalGui.TOP = tl
+                    cbbx.focus_set()
                 else:
-                    messagebox.showwarning('CalGui', 'Please choose a file!!!')    
+                    messagebox.showwarning('CalGui', 'No Record!!!')
             else:
-                messagebox.showwarning('CalGui', 'No Record!!!')
-        else:
-            messagebox.showwarning('CalGui', 'Nothing found!!!')
+                messagebox.showwarning('CalGui', 'Nothing found!!!')
                     
     def rem(self, event = None):
         #Making reminder like alarm, but a window will pop-up.
@@ -399,8 +566,10 @@ class CalGui:
                 self.entry.config(background = 'yellow', foreground = 'black')
                 messagebox.showinfo("Reminder", 'Reminder is aborted!!!')    
         else:
+            import winsound
             tm = dt.datetime.timestamp(dt.datetime.today().replace(microsecond=0))
             if tm >= self.rdr[1]:
+                winsound.Beep(800,350)
                 messagebox.showinfo("Reminder", 
                                     f'{dt.datetime.fromtimestamp(tm)}\nReminder:\n{self.rdr[0]}')
                 self.entry.config(background = 'yellow', foreground = 'black')
@@ -482,27 +651,57 @@ class CalGui:
                         self.text.tag_config('hg', foreground = lc[lc.index(spb.get())])
                 except:
                     pass
+                
             def chc(event = None):
                 CalGui.TOP = None
                 cco()
+                tl.unbind_all("<q>")
+                tl.unbind_all("<Q>")
+                tl.unbind_all('<f>')
+                tl.unbind_all('<Control-t>')
+                tl.unbind_all('<Control-g>')
+                for i in self.bt:
+                    if isinstance(self.bt[i], tuple):
+                        self.bt[i][0].config(state = 'normal')
+                        self.bt[i][0].bind_all(self.bt[i][1], self.bt[i][2])
+                    else:
+                        if i != 'text':
+                            self.bt[i].config(state = 'normal')                
                 tl.destroy()
             
+            def fcs(event = None):
+                if event.keysym == 'f':
+                    spb.focus()
+                elif event.keysym == 't':
+                    rt1.set(False)
+                elif event.keysym == 'g':
+                    rt1.set(True)
+                    
+            for i in self.bt:
+                if isinstance(self.bt[i], tuple):
+                    self.bt[i][0].config(state = 'disable')
+                    self.bt[i][0].unbind_all(self.bt[i][1])
+                else:
+                    self.bt[i].config(state = 'disable')            
             tl = Toplevel()
+            tl.resizable(False, False)
+            tl.wm_attributes("-topmost", 1)
+            tl.title('Color Highlight')
             tl.overrideredirect(True)
             tl.bind_all("<q>",chc)
-            tl.bind_all("<Q>",chc)            
-            spb = Spinbox(tl, command= high, values=lc, 
-                          font=Font(family='Helvetica', size=20, weight='bold'))
+            tl.bind_all("<Q>",chc)
+            tl.bind_all('<f>', fcs)
+            tl.bind_all('<Control-t>', fcs)
+            tl.bind_all('<Control-g>', fcs)            
+            spb = Spinbox(tl, command= high, values=lc, font= 'Helvetica 20 bold')
             spb.pack(side = LEFT, padx = 5)
             rt1 = BooleanVar()
             rbt1 = ttk.Radiobutton(tl, text = 'H', variable = rt1, value = False)
             rbt2 = ttk.Radiobutton(tl, text = 'F', variable = rt1, value = True)
-            rbt1.pack(pady = 15, padx = 5)
-            rbt2.pack(pady = 10, padx = 5)
+            rbt1.pack(pady = 2, padx = 5)
+            rbt2.pack(pady = 2, padx = 5)
             CalGui.TOP = tl
-            spb.focus_force()
-        else:
-            CalGui.TOP.lift()
+            spb.focus_set()
  
     def calbg(self, event = None):
         #Changing colors for the Calendar background and foreground(the text).
@@ -532,109 +731,213 @@ class CalGui:
             def chc(event = None):
                 CalGui.TOP = None
                 cco()
+                tl.unbind_all("<q>")
+                tl.unbind_all("<Q>")
+                tl.unbind_all('<f>')
+                tl.unbind_all('<Control-t>')
+                tl.unbind_all('<Control-g>')
+                tl.grab_release()
+                for i in self.bt:
+                    if isinstance(self.bt[i], tuple):
+                        self.bt[i][0].config(state = 'normal')
+                        self.bt[i][0].bind_all(self.bt[i][1], self.bt[i][2])
+                    else:
+                        if i != 'text':
+                            self.bt[i].config(state = 'normal')                
                 tl.destroy()
             
+            def fcs(event = None):
+                if event.keysym == 'f':
+                    spb2.focus()
+                elif event.keysym == 't':
+                    rt2.set(False)
+                elif event.keysym == 'g':
+                    rt2.set(True)
+            
+            for i in self.bt:
+                if isinstance(self.bt[i], tuple):
+                    self.bt[i][0].config(state = 'disable')
+                    self.bt[i][0].unbind_all(self.bt[i][1])
+                else:
+                    self.bt[i].config(state = 'disable')
             tl = Toplevel()
+            tl.resizable(False, False)
+            tl.wm_attributes("-topmost", 1)
+            tl.title('Color Background')
             tl.overrideredirect(True)
-            tl.bind_all("<q>",chc)
-            tl.bind_all("<Q>",chc)            
-            spb2 = Spinbox(tl, values = lc, command= clc, font=Font(family='Helvetica', 
-                           size=20, weight='bold'))
+            tl.bind_all("<q>", chc)
+            tl.bind_all("<Q>", chc)
+            tl.bind_all('<f>', fcs)
+            tl.bind_all('<Control-t>', fcs)
+            tl.bind_all('<Control-g>', fcs)
+            spb2 = Spinbox(tl, values = lc, command= clc, font= 'Helvetica 20 bold')
             spb2.pack(side = LEFT, padx = 5)
             rt2 = BooleanVar()
             cbr1 = ttk.Radiobutton(tl, text = 'B', variable = rt2, value = False)
             cbr2 = ttk.Radiobutton(tl, text = 'F', variable = rt2, value = True)
-            cbr1.pack(pady = 15, padx = 5)
-            cbr2.pack(pady = 10, padx = 5)
+            cbr1.pack(pady = 2, padx = 5)
+            cbr2.pack(pady = 2, padx = 5)
             CalGui.TOP = tl
-            spb2.focus_force()
-        else:
-            CalGui.TOP.lift()
-
+            spb2.focus_set()
+            
     def savs(self, event = None):
         #Saving the color theme that has been set.
         
+        import json
         import os
+        
         dirc = os.getcwd()
         if 'Calset' in os.listdir():
             os.chdir('Calset')
         else:
             os.mkdir('Calset')
-            os.chdir('Calset')
-        
+            os.chdir('Calset')            
         ask = messagebox.askyesno('CalGui', 'Save setting color?')
         if ask:
             if 'stc.txt' in os.listdir():
                 ask = messagebox.askyesno('CalGui', 'Adding more setting?')
                 if ask:
                     std = {}
-                    with open('stc.txt', 'a') as sett:
+                    with open('stc.txt') as sett:
+                        gj  = json.load(sett)
                         std = {'Highlight': self.text.tag_cget("hg","background"),
                                'Foreground': self.text.tag_cget("hg","foreground"),
                                'Label': str(self.label.cget('foreground')),
                                'CB': str(self.text.cget('background')),
                                'CF': str(self.text.cget('foreground'))
                                }
-                        sett.write(f'{std}\n')
+                        gj['stc'].append(std)
+                    with open('stc.txt', 'w') as sett:
+                        json.dump(gj,sett)
+                    os.chdir(dirc)
+                    
                 else:
+                    os.chdir(dirc)
                     messagebox.showinfo('CalGui', 'Saving setting aborted!')
             else:
                 std = {}
                 with open('stc.txt', 'w') as sett:
-                    std = {'Highlight': self.text.tag_cget("hg","background"),
+                    std['stc'] = []
+                    std['stc'].append({'Highlight': self.text.tag_cget("hg","background"),
                            'Foreground': self.text.tag_cget("hg","foreground"),
                            'Label': str(self.label.cget('foreground')),
                            'CB': str(self.text.cget('background')),
                            'CF': str(self.text.cget('foreground'))
-                           }
-                    sett.write(f'{std}\n')
+                           })
+                    json.dump(std, sett)
+                os.chdir(dirc)
         else:
             if 'stc.txt' in os.listdir():
-                ask = messagebox.askyesno('CalGui', '"Yes" set color, and "No" to delete setting!')
-                if ask:
-                    with open('stc.txt') as sett:
-                        rd = sett.readlines()
-                    if len(rd)>1:
-                        msg = f'There are {len(rd)} Color Settings, choose 1 to {len(rd)}:'
-                        setget = simpledialog.askinteger('CalGui', msg)
-                        if setget:
-                            std = eval(rd[setget-1])
-                        else:
-                            std = eval(rd[len(rd)-1])
-                    else:
-                        std = eval(rd[0])
+                with open('stc.txt') as sett:
+                    gj = json.load(sett)
                     
+                def cbf(event = None):
+                    cbbx.focus_set()
+                
+                def chosensett(event = None):
+                    rw = int(ev.get()[:ev.get().find(':')])
+                    with open('stc.txt') as sett:
+                        rd = json.load(sett)
+                    std = rd['stc'][rw]
+                    for i in self.bt:
+                        if isinstance(self.bt[i], tuple):
+                            self.bt[i][0].config(state = 'normal')
+                            self.bt[i][0].bind_all(self.bt[i][1], self.bt[i][2])
+                        else:
+                            if i != 'text':
+                                self.bt[i].config(state = 'normal')                    
                     self.text.tag_config('hg', background = std['Highlight'], 
                                          foreground= std['Foreground'])
                     self.text.config(background = std['CB'], foreground= std['CF'])
                     self.label.config(foreground = std['Label'])
-                    
-                else:
+                    for i in self.bt:
+                        if isinstance(self.bt[i], tuple):
+                            self.bt[i][0].config(state = 'disable')
+                            self.bt[i][0].unbind_all(self.bt[i][1])
+                        else:
+                            self.bt[i].config(state = 'disable')
+                    hback = self.text.tag_cget("hg","background")
+                    hfore = self.text.tag_cget("hg","foreground")
+                    labc = self.label.cget("foreground")
+                    cback = self.text.cget("background")
+                    cfore = self.text.cget("foreground")
+                    messagebox.showinfo('Info setting Now', 
+                    f'Highlight: {hback}\nForeground: {hfore}\nLabel Color: {labc}\nCalBackground: {cback}\nCalForeground: {cfore}')
+                
+                def delsett(event = None):
+                    rw = int(ev.get()[:ev.get().find(':')])
                     with open('stc.txt') as sett:
-                        rd = sett.readlines()
-                    if len(rd)>1:
-                        msg = f'There are {len(rd)} Color Settings, choose 1 to {len(rd)}:'
-                        setget = simpledialog.askinteger('Delete setting!', msg)
-                        if setget:
-                            del rd[setget-1]
-                            with open('stc.txt', 'w') as sett:
-                                sett.writelines(rd)
-                        else:
-                            messagebox.showinfo('Deletion', 'Aborted!')
+                        rd = json.load(sett)
+                    if len(rd['stc']) > 1:
+                        del rd['stc'][rw]
+                        with open('stc.txt', 'w') as sett:
+                            json.dump(rd, sett)
+                        cbbx.config(state = 'normal')
+                        cbbx.delete(0, END)
+                        cbbx['values'] = [f'{i}: {rd["stc"][i]}' for i in range(len(rd['stc']))]
+                        cbbx.current(0)
+                        cbbx.config(state = 'readonly')
                     else:
-                        msg = 'This will delete the setting file as well, are you sure?'        
-                        ask = messagebox.askyesno('Deelete setting!', msg)
-                        if ask:
-                            os.remove('stc.txt')
+                        os.remove('stc.txt')
+                        chc()
+                        
+                def chc(event = None):
+                    CalGui.TOP = None
+                    tl.unbind_all("<q>")
+                    tl.unbind_all("<Q>")
+                    tl.unbind_all('<f>')
+                    tl.unbind_all('<c>')
+                    tl.unbind_all('<d>')
+                    for i in self.bt:
+                        if isinstance(self.bt[i], tuple):
+                            self.bt[i][0].config(state = 'normal')
+                            self.bt[i][0].bind_all(self.bt[i][1], self.bt[i][2])
                         else:
-                            messagebox.showinfo('Deletion', 'Aborted!')
+                            if i != 'text':
+                                self.bt[i].config(state = 'normal')
+                    os.chdir(dirc)
+                    tl.destroy()
+                
+                for i in self.bt:
+                    if isinstance(self.bt[i], tuple):
+                        self.bt[i][0].config(state = 'disable')
+                        self.bt[i][0].unbind_all(self.bt[i][1])
+                    else:
+                        self.bt[i].config(state = 'disable')
+                        
+                tl = Toplevel()
+                tl.resizable(False, False)
+                tl.wm_attributes("-topmost", 1)
+                tl.title('Choose Event')
+                tl.overrideredirect(True)
+                tl.bind_all("<q>", chc)
+                tl.bind_all("<Q>", chc)
+                tl.bind_all('<c>', chosensett)
+                tl.bind_all('<d>', delsett)
+                label = Label(tl, text = 'Please select recorded Setting')
+                label.pack(pady = 5)
+                ev = StringVar()
+                cbbx = ttk.Combobox(tl, textvariable = ev, font= 'Helvetica 12 bold')
+                cbbx['values'] = [f'{i}: {gj["stc"][i]}' for i in range(len(gj['stc']))]
+                cbbx.current(0)
+                cbbx.config(state = 'readonly')
+                cbbx.pack(padx = 5)
+                tl.bind_all('<f>', cbf)
+                fr = Frame(tl)
+                fr.pack()
+                butcho = Button(fr, text = 'Select setting', command = chosensett)
+                butcho.pack(side = LEFT, pady = 5)
+                buteve = Button(fr, text = 'Delete setting', command = delsett)
+                buteve.pack(side = RIGHT, pady = 5)
+                CalGui.TOP = tl
+                cbbx.focus_set()
             else:
                 messagebox.showinfo('CalGui', 'No colors saved yet!')
-        os.chdir(dirc)
-        messagebox.showinfo('Info setting Now', 
-        f'Highlight: {self.text.tag_cget("hg","background")}\nForground: {self.text.tag_cget("hg","foreground")}\nLabel Color: {self.label.cget("foreground")}\nCalBackground: {self.text.cget("background")}\nCalForeground: {self.text.cget("foreground")}')
-        
+                os.chdir(dirc)
+                
 def main():
+    #Starting the app.
+    
     import os
     if 'Caldata' in os.listdir():
         os.chdir('Caldata')
@@ -643,32 +946,8 @@ def main():
         os.chdir('Caldata')
     root =  Tk()
     start = CalGui(root)
-#THIS LICENSE NOTICE IS FOR THE PURPOSE OF BUILDING AN EXE FILE, AS PANDAS SOURCE CODES ARE INCLUDED IN THIS APPLICATION.
-#    lcs = '''Pandas under BSD 3-Clause License
-                            
-#Copyright (c) 2008-2011, AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team All rights reserved.
-#
-#Copyright (c) 2011-2020, Open source contributors. 
-#
-#Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
-#    * Redistributions of source code must retain the above
-#      copyright notice, this list of conditions and the following
-#      disclaimer.
-#      
-#    * Redistributions in binary form must reproduce the above
-#      copyright notice, this list of conditions and the
-#      following disclaimer in the documentation and/or
-#      other materials provided with the distribution. 
-#    
-#    * Neither the name of the copyright holder nor the names
-#      of its contributors may be used to endorse or promote
-#      products derived from this software without specific
-#      prior written permission. 
-#    
-#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'''
-#    root.update()
-#    messagebox.showinfo('License Notification',lcs)    
+    root.update()   
     root.mainloop()
-
+    
 if __name__ == "__main__":
     main()
