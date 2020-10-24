@@ -13,7 +13,6 @@ from tkinter import simpledialog, messagebox
 import calendar as cal
 import pandas as pd
 import datetime as dt
-import time
 
 class ChoCal:
     """Creating Calendar engine."""
@@ -24,12 +23,11 @@ class ChoCal:
         self.year = year
         self.month = month
         self.day = day
-    
+        
     def createcal(self):
         cal.setfirstweekday(cal.SUNDAY)
         cm = [cal.monthcalendar(self.year,i+1) for i in range(12)]            
         monthy = self.month-1
-        dayth = self.day
         mo = [i for i in cal.month_name if i != '']
         monthdict = { i:d for i, d in zip(mo,cm)}
         days = cal.weekheader(2).split()
@@ -65,23 +63,14 @@ class CalGui:
     RUN = False
     TOP = None
     
-    def __init__(self, root):
+    def __init__(self, root = Tk()):
         self.root = root
         self.sd = []
         self.rdr =[]
         self.txfile =''
-        
-        self.wwidth = self.root.winfo_reqwidth()
-        self.wheight = self.root.winfo_reqheight()
-        self.pwidth = int(self.root.winfo_screenwidth()/17 - self.wwidth/17)
-        self.pheight = int(self.root.winfo_screenheight()/17 - self.wheight/17)
-        self.root.geometry(f"+{self.pwidth}+{self.pheight}")
+        self.root.geometry(f"{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()-20}+0+0")
         self.root.overrideredirect(True)
-        self.root.config(background = 'teal')
-        self.root.bind_all('<Left>', self.mlr)
-        self.root.bind_all('<Right>', self.mlr)
-        self.root.bind_all('<Up>',self. mlr)
-        self.root.bind_all('<Down>', self.mlr)
+        self.root.config(background = 'teal') 
         self.root.bind_all('<Control-Left>', self.mtc)
         self.root.bind_all('<Control-Right>', self.mtc)
         self.root.bind_all('<Shift-Left>', self.dtc)
@@ -90,21 +79,25 @@ class CalGui:
         self.root.bind_all('<Alt-Right>', self.yrc)
         self.bt = {}
         self.sc1 = Scale(self.root, from_=1800, to=2300, orient = HORIZONTAL, 
-                    command = self.ccal, background = 'gold')
+                    command = self.ccal, background = 'teal', fg = 'white',
+                    font = 'verdana 8 bold')
         self.sc1.set(dt.datetime.today().year)
         self.sc1.pack(pady = 3, padx = 3 , fill = 'both')
         self.bt['sc1'] = self.sc1
         self.sc2 = Scale(self.root, from_=1, to=12, orient = HORIZONTAL, 
-                    command = self.ccal, background = 'gold')
+                    command = self.ccal, background = 'teal', fg = 'white',
+                    font = 'verdana 8 bold')
         self.sc2.set(dt.datetime.today().month)
         self.sc2.pack(pady = 2, padx = 3 , fill = 'both')
         self.bt['sc2'] = self.sc2
         self.sc3 = Scale(self.root, from_=1, to=31, orient = HORIZONTAL, 
-                    command = self.ccal, background = 'gold')
+                    command = self.ccal, background = 'teal', fg = 'white',
+                    font = 'verdana 8 bold')
         self.sc3.set(dt.datetime.today().day)
         self.sc3.pack(pady = 3, padx = 3 , fill = 'both')
         self.bt['sc3'] = self.sc3
-        self.text = Text(self.root, font = 'courier 20 bold', width = 48, height = 8, background ='light blue', foreground='indigo', relief = SUNKEN)
+        self.text = Text(self.root, font = 'consolas 35 bold', height = 8, background ='light blue',
+                         foreground='indigo', relief = SUNKEN)
         self.text.tag_add('bd', '1.0', END)
         self.text.tag_config('bd', justify = 'center')
         self.text.tag_config('thg', background = 'dark orange', foreground = 'black')
@@ -117,90 +110,72 @@ class CalGui:
                          fg = 'black', activebackground = 'teal', activeforeground = 'white')
         self.cb.bind_all('<Control-k>', self.setcb)
         self.cb.pack(pady = 5)
-        self.bt['cb'] = (self.cb, '<Control-k>', self.setcb)
+        self.bt['cb'] = (self.cb, '<Control-k>', self.setcb)       
         self.lvar = StringVar()
-        self.label = ttk.Label(root, textvariable = self.lvar, font = 'verdana 20 bold', 
-                          background = 'teal', foreground = 'white' )
-        self.label.pack(pady = 5)
+        self.label = ttk.Label(self.root, textvariable = self.lvar, background = 'teal', foreground = 'white' )
+        self.label.pack(pady = 7)
         self.frb = ttk.Frame(self.root)
-        self.frb.pack(pady = 7)
+        self.frb.pack(side = BOTTOM, pady = 25)
         self.lb = Button(self.frb, text = 'Load Set Date', command = self.loaddat, 
-                         bg = 'yellow', fg = 'black',
+                         bg = 'teal', fg = 'white',
                          activebackground = 'green', activeforeground = 'white',
-                         highlightthickness = 0, bd = 0)
+                         highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.lb.bind_all('<Control-l>', self.loaddat)
-        self.lb.pack(side = LEFT)
+        self.lb.pack(side = LEFT, padx = (0, 2))
         self.bt['lb'] = (self.lb, '<Control-l>', self.loaddat)
         self.stb = Button(self.frb, text = 'Current Date/Set', command = self.sdat, 
-                          bg = 'yellow', fg = 'black', activebackground = 'green', 
-                          activeforeground = 'white',highlightthickness = 0, bd = 0)
+                          bg = 'teal', fg = 'white', activebackground = 'green', 
+                          activeforeground = 'white',highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.stb.bind_all('<Control-c>', self.sdat)
-        self.stb.pack(side = LEFT, padx=2)
+        self.stb.pack(side = LEFT, padx = (0, 2))
         self.bt['stb'] = (self.stb, '<Control-c>', self.sdat)
         self.entry = Button(self.frb, text = 'Reminder', command = self.rem, 
-                            bg = 'yellow', fg = 'black', activebackground = 'green', 
-                            activeforeground = 'white', highlightthickness = 0, bd = 0)
+                            bg = 'teal', fg = 'white', activebackground = 'green', 
+                            activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.entry.bind_all('<Control-m>', self.rem)
-        self.entry.pack(side = LEFT)
+        self.entry.pack(side = LEFT, padx = (0, 2))
         self.bt['entry'] = (self.entry, '<Control-m>', self.rem)
         self.cdb = Button(self.frb, text = 'Calculate', command = self.calcd, 
-                          bg = 'yellow', fg = 'black', activebackground = 'green', 
-                          activeforeground = 'white', highlightthickness = 0, bd = 0)
+                          bg = 'teal', fg = 'white', activebackground = 'green', 
+                          activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.cdb.bind_all('<Control-equal>', self.calcd)
-        self.cdb.pack(side = LEFT, padx=2)
+        self.cdb.pack(side = LEFT, padx = (0, 2))
         self.bt['cdb'] = (self.cdb, '<Control-equal>', self.calcd)
         self.stob = Button(self.frb, text = 'Run Color', command = self.colrun, 
-                           bg = 'yellow', fg = 'black', activebackground = 'green', 
-                           activeforeground = 'white', highlightthickness = 0, bd = 0)
+                           bg = 'teal', fg = 'white', activebackground = 'green', 
+                           activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.stob.bind_all('<Control-r>', self.colrun)
-        self.stob.pack(side = LEFT)
+        self.stob.pack(side = LEFT, padx = (0, 2))
         self.bt['stob'] = (self.stob, '<Control-r>', self.colrun)
         self.recb = Button(self.frb, text = 'Record Set Date', command = self.recdat, 
-                         bg = 'yellow', fg = 'black', activebackground = 'green', 
-                         activeforeground = 'white', highlightthickness = 0, bd = 0)
+                         bg = 'teal', fg = 'white', activebackground = 'green', 
+                         activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.recb.bind_all('<Control-e>', self.recdat)
-        self.recb.pack(side = LEFT, padx=2)
+        self.recb.pack(side = LEFT, padx = (0, 2))
         self.bt['recb'] = (self.recb, '<Control-e>', self.recdat)
-        self.hcbb = Button(self.frb, text = 'Highlight', command = self.colorh, 
-                           bg = 'yellow', fg = 'black', activebackground = 'green', 
-                           activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.hcbb = Button(self.frb, text = 'Highlight Color', command = self.colorh, 
+                           bg = 'teal', fg = 'white', activebackground = 'green', 
+                           activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.hcbb.bind_all('<Control-h>', self.colorh)
-        self.hcbb.pack(side = LEFT)
+        self.hcbb.pack(side = LEFT, padx = (0, 2))
         self.bt['hcbb'] = (self.hcbb, '<Control-h>', self.colorh)
-        self.clbcb = Button(self.frb, text = 'Cal Bg Color', command = self.calbg, 
-                            bg = 'yellow', fg = 'black', activebackground = 'green', 
-                            activeforeground = 'white', highlightthickness = 0, bd = 0)
+        self.clbcb = Button(self.frb, text = 'Background Color', command = self.calbg, 
+                            bg = 'teal', fg = 'white', activebackground = 'green', 
+                            activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.clbcb.bind_all('<Control-b>', self.calbg)
-        self.clbcb.pack(side = LEFT, padx=2)
+        self.clbcb.pack(side = LEFT, padx = (0, 2))
         self.bt['clbcb'] = (self.clbcb, '<Control-b>', self.calbg)
         self.setb = Button(self.frb, text = 'Saving Colors', command = self.savs, 
-                           bg = 'yellow', fg = 'black', activebackground = 'green', 
-                           activeforeground = 'white', highlightthickness = 0, bd = 0)
+                           bg = 'teal', fg = 'white', activebackground = 'green', 
+                           activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.setb.bind_all('<Control-s>', self.savs)
-        self.setb.pack(side = LEFT)
+        self.setb.pack(side = LEFT, padx = (0, 2))
         self.bt['setb'] = (self.setb, '<Control-s>', self.savs)
         self.but = Button(self.frb, text = 'Close', command = self.root.destroy, 
-                         bg = 'blue', fg = 'white', activebackground = 'black', 
-                         activeforeground = 'white',highlightthickness = 1, bd = 0)
+                         bg = 'teal', fg = 'white', activebackground = 'black', 
+                         activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.but.pack(side = LEFT)
         self.bt['but'] = self.but
-        
-    def mlr(self, event = None):
-        # Moving the app's window to any position on the screen.
-        
-        if not CalGui.TOP:
-            if event.keysym == 'Left':
-                self.pwidth = self.pwidth - 10
-                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-            elif event.keysym == 'Right':
-                self.pwidth = self.pwidth + 10
-                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-            elif event.keysym == 'Down':
-                self.pheight = self.pheight + 10
-                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
-            elif event.keysym == 'Up':
-                self.pheight = self.pheight - 10
-                self.root.geometry(f"+{self.pwidth}+{self.pheight}")
                 
     def dtc(self, event = None):
         # Moving the scale of the day.
@@ -235,7 +210,7 @@ class CalGui:
     def ccal(self, event = None):
         #Creating Calendar according to the scales of the years, months and days.
         
-        self.label.config(font = 'verdana 20 bold')
+        self.label.config(font = 'verdana 30 bold')
         cc = ChoCal(self.sc1.get(), self.sc2.get(), self.sc3.get())
         self.sc3.config(to = cc.monrang(self.sc1.get(), self.sc2.get()))
         self.text.config(state = 'normal')
@@ -327,7 +302,8 @@ class CalGui:
     def scald(self, event = None):
         #Setting year, month and day as default on set date check button.
          
-        self.label.config(font = 'verdana 20 bold')
+        self.label.config(font = 'verdana 30 bold')
+        self.label.pack(pady = 7)
         if self.gset.get():
             self.sd.clear()
             self.sd.extend((self.sc1.get(), self.sc2.get(), self.sc3.get()))        
@@ -396,7 +372,6 @@ class CalGui:
             import os
             dirc = os.getcwd()
             if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
-                fi = ''
                 files = [i for i in os.listdir() if '.' in i]
                 if files:
                     def chosenfile(event = None):
@@ -563,7 +538,7 @@ class CalGui:
                 self.rdr.extend((remi,set))
                 self.root.after(1000,self.rem)
             else:
-                self.entry.config(background = 'yellow', foreground = 'black')
+                self.entry.config(background = 'teal', foreground = 'white')
                 messagebox.showinfo("Reminder", 'Reminder is aborted!!!')    
         else:
             import winsound
@@ -572,7 +547,7 @@ class CalGui:
                 winsound.Beep(800,350)
                 messagebox.showinfo("Reminder", 
                                     f'{dt.datetime.fromtimestamp(tm)}\nReminder:\n{self.rdr[0]}')
-                self.entry.config(background = 'yellow', foreground = 'black')
+                self.entry.config(background = 'teal', foreground = 'white')
                 self.rdr = []
             else:
                 self.root.after(1000,self.rem)
@@ -582,7 +557,8 @@ class CalGui:
         
         if CalGui.SELF:
             CalGui.SELF = False
-            self.label.config(font = 'verdana 15 bold')
+            self.label.config(font = 'verdana 27 bold')
+            self.label.pack(pady = 9)
             if self.sd:
                 de = dt.date(self.sc1.get(), 
                 self.sc2.get(), self.sc3.get()) - dt.date(self.sd[0], 
@@ -591,7 +567,6 @@ class CalGui:
                 de = dt.date(self.sc1.get(), self.sc2.get(), self.sc3.get()) - dt.date.today()
             td = de.days
             pt = {365:0, 30:0, 7:0, 1:0}
-            te = 0
             for i in pt:
                 if td//i:
                     pt[i]=td//i
@@ -618,12 +593,14 @@ class CalGui:
                     else:
                         self.lvar.set(f"{td} day left.")
             else:
-                self.label.config(font = 'verdana 20 bold')
+                self.label.config(font = 'verdana 30 bold')
+                self.label.pack(pady = 7)
                 messagebox.showinfo('CalGui', 'No days left!')
             
         else:
             CalGui.SELF = True
-            self.label.config(font = 'verdana 20 bold')
+            self.label.config(font = 'verdana 30 bold')
+            self.label.pack(pady = 7)
             self.lvar.set(self.cald())
             
 
@@ -944,10 +921,8 @@ def main():
     else:
         os.mkdir('Caldata')
         os.chdir('Caldata')
-    root =  Tk()
-    start = CalGui(root)
-    root.update()   
-    root.mainloop()
+    start = CalGui()   
+    start.root.mainloop()
     
 if __name__ == "__main__":
     main()
