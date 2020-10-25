@@ -13,6 +13,7 @@ from tkinter import simpledialog, messagebox
 import calendar as cal
 import pandas as pd
 import datetime as dt
+import os
 
 class ChoCal:
     """Creating Calendar engine."""
@@ -68,7 +69,7 @@ class CalGui:
         self.sd = []
         self.rdr =[]
         self.txfile =''
-        self.root.geometry(f"{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()-20}+0+0")
+        self.root.state('zoomed')
         self.root.overrideredirect(True)
         self.root.config(background = 'teal') 
         self.root.bind_all('<Control-Left>', self.mtc)
@@ -96,7 +97,7 @@ class CalGui:
         self.sc3.set(dt.datetime.today().day)
         self.sc3.pack(pady = 3, padx = 3 , fill = 'both')
         self.bt['sc3'] = self.sc3
-        self.text = Text(self.root, font = 'consolas 35 bold', height = 8, background ='light blue',
+        self.text = Text(self.root, font = 'consolas 37 bold', height = 8, background ='light blue',
                          foreground='indigo', relief = SUNKEN)
         self.text.tag_add('bd', '1.0', END)
         self.text.tag_config('bd', justify = 'center')
@@ -171,12 +172,30 @@ class CalGui:
         self.setb.bind_all('<Control-s>', self.savs)
         self.setb.pack(side = LEFT, padx = (0, 2))
         self.bt['setb'] = (self.setb, '<Control-s>', self.savs)
+        self.setd = Button(self.frb, text = 'Setting Default Theme', command = self.setcor, 
+                           bg = 'teal', fg = 'white', activebackground = 'green', 
+                           activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
+        self.setd.bind_all('<Control-d>', self.setcor)
+        self.setd.pack(side = LEFT, padx = (0, 2))
+        self.bt['setd'] = (self.setd, '<Control-d>', self.setcor)        
         self.but = Button(self.frb, text = 'Close', command = self.root.destroy, 
                          bg = 'teal', fg = 'white', activebackground = 'black', 
                          activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.but.pack(side = LEFT)
         self.bt['but'] = self.but
-                
+        
+        if 'Calset' in os.listdir():
+            orpa = os.getcwd()
+            os.chdir('Calset')
+            if 'setnext.txt' in os.listdir():
+                with open('setnext.txt') as setfile:
+                    sf = eval(setfile.read())
+                self.text.tag_config('hg', background = sf[0], 
+                                     foreground= sf[1])
+                self.label.config(foreground = sf[2])
+                self.text.config(background = sf[3], foreground= sf[4])
+            os.chdir(orpa)
+            
     def dtc(self, event = None):
         # Moving the scale of the day.
         
@@ -258,9 +277,8 @@ class CalGui:
                 if int(f) < 0:
                     return f'{c} have passed to today {dt.date.isoformat(dt.datetime.today())}'
                 elif int(f) > 0:
-                    return f'{c} to go from today {dt.date.isoformat(dt.datetime.today())}' 
-
-    
+                    return f'{c} to go from today {dt.date.isoformat(dt.datetime.today())}'
+                
     def tn(self):
         #Running the seconds display and colored them.
         
@@ -333,7 +351,6 @@ class CalGui:
     def recdat(self, event = None):
         #Saving event for specific date that has been set, and recorded.
         
-        import os
         dirc = os.getcwd()
         if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
             file = simpledialog.askstring('CalGui', 'File name create?')
@@ -369,7 +386,7 @@ class CalGui:
         #Load a date base on the event that has been saved.
         
         if CalGui.TOP is None:
-            import os
+            
             dirc = os.getcwd()
             if 'Caldata' == dirc[dirc.rfind("\\")+1:]:
                 files = [i for i in os.listdir() if '.' in i]
@@ -527,7 +544,7 @@ class CalGui:
                 messagebox.showwarning('CalGui', 'Nothing found!!!')
                     
     def rem(self, event = None):
-        #Making reminder like alarm, but a window will pop-up.
+        #Making reminder like alarm, a window will pop-up and a beep sound.
         
         if not self.rdr:
             self.entry.config(background = 'green', foreground = 'white')
@@ -573,8 +590,6 @@ class CalGui:
                     td = td-(i*pt[i])
             td = sum([k*l for k,l in pt.items()])
             
-            assert td == de.days
-            
             if td:
                 nt = ['years', 'months', 'weeks', 'days']
                 tm = list(pt)
@@ -593,6 +608,7 @@ class CalGui:
                     else:
                         self.lvar.set(f"{td} day left.")
             else:
+                CalGui.SELF = True
                 self.label.config(font = 'verdana 30 bold')
                 self.label.pack(pady = 7)
                 messagebox.showinfo('CalGui', 'No days left!')
@@ -603,12 +619,11 @@ class CalGui:
             self.label.pack(pady = 7)
             self.lvar.set(self.cald())
             
-
     def colorh(self, event = None):
         #Changing color on the highlight and the foreground.
         
         from CreateColors import create_colors as cco
-        import os
+        
         if not CalGui.TOP:    
             if not 'tkcols.txt' in os.listdir():
                 cco()
@@ -679,12 +694,12 @@ class CalGui:
             rbt2.pack(pady = 2, padx = 5)
             CalGui.TOP = tl
             spb.focus_set()
- 
+            
     def calbg(self, event = None):
         #Changing colors for the Calendar background and foreground(the text).
         
         from CreateColors import create_colors as cco
-        import os
+        
         if not CalGui.TOP:
             if not 'tkcols.txt' in os.listdir():
                 cco()
@@ -704,7 +719,7 @@ class CalGui:
                         self.text.configure(foreground = lc[lc.index(spb2.get())])
                 except:
                     pass
-            
+                 
             def chc(event = None):
                 CalGui.TOP = None
                 cco()
@@ -722,7 +737,7 @@ class CalGui:
                         if i != 'text':
                             self.bt[i].config(state = 'normal')                
                 tl.destroy()
-            
+                
             def fcs(event = None):
                 if event.keysym == 'f':
                     spb2.focus()
@@ -730,7 +745,7 @@ class CalGui:
                     rt2.set(False)
                 elif event.keysym == 'g':
                     rt2.set(True)
-            
+                    
             for i in self.bt:
                 if isinstance(self.bt[i], tuple):
                     self.bt[i][0].config(state = 'disable')
@@ -761,7 +776,6 @@ class CalGui:
         #Saving the color theme that has been set.
         
         import json
-        import os
         
         dirc = os.getcwd()
         if 'Calset' in os.listdir():
@@ -840,7 +854,7 @@ class CalGui:
                     cfore = self.text.cget("foreground")
                     messagebox.showinfo('Info setting Now', 
                     f'Highlight: {hback}\nForeground: {hfore}\nLabel Color: {labc}\nCalBackground: {cback}\nCalForeground: {cfore}')
-                
+                    
                 def delsett(event = None):
                     rw = int(ev.get()[:ev.get().find(':')])
                     with open('stc.txt') as sett:
@@ -874,7 +888,7 @@ class CalGui:
                                 self.bt[i].config(state = 'normal')
                     os.chdir(dirc)
                     tl.destroy()
-                
+                    
                 for i in self.bt:
                     if isinstance(self.bt[i], tuple):
                         self.bt[i][0].config(state = 'disable')
@@ -912,10 +926,47 @@ class CalGui:
                 messagebox.showinfo('CalGui', 'No colors saved yet!')
                 os.chdir(dirc)
                 
+    def setcor(self, event = None):
+        # Setting the theme colors as default.
+        
+        dirc = os.getcwd()
+        if 'Calset' in os.listdir():
+            os.chdir('Calset')
+        else:
+            os.mkdir('Calset')
+            os.chdir('Calset')
+        if 'setnext.txt' in os.listdir():
+            ask = messagebox.askyesno('CalGui', '"Yes" Delete theme setting, "No" Save existing theme')
+            if ask:
+                os.remove('setnext.txt')
+                messagebox.showinfo('CalGui', 'The setting back to original')
+            else:
+                tak = [self.text.tag_cget("hg","background"),
+                       self.text.tag_cget("hg","foreground"),
+                       str(self.label.cget("foreground")),
+                       str(self.text.cget("background")),
+                       str(self.text.cget("foreground")),
+                      ]
+                tak = {i: j for i, j in enumerate(tak)}
+                with open('setnext.txt', 'w') as stf:
+                    stf.write(str(tak))
+                messagebox.showinfo('CalGui', 'This theme will be set as default theme!')
+        else:
+            tak = [self.text.tag_cget("hg","background"),
+                   self.text.tag_cget("hg","foreground"),
+                   str(self.label.cget("foreground")),
+                   str(self.text.cget("background")),
+                   str(self.text.cget("foreground")),
+                  ]
+            tak = {i: j for i, j in enumerate(tak)}
+            with open('setnext.txt', 'w') as stf:
+                stf.write(str(tak))
+            messagebox.showinfo('CalGui', 'This theme will be set as default theme!')            
+        os.chdir(dirc)
+
 def main():
     #Starting the app.
     
-    import os
     if 'Caldata' in os.listdir():
         os.chdir('Caldata')
     else:
