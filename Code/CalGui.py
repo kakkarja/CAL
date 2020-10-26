@@ -183,6 +183,7 @@ class CalGui:
                          activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.but.pack(side = LEFT)
         self.bt['but'] = self.but
+        self.root.bind_all('<Control-i>', self.resapp)
         
         if 'Calset' in os.listdir():
             orpa = os.getcwd()
@@ -195,6 +196,18 @@ class CalGui:
                 self.label.config(foreground = sf[2])
                 self.text.config(background = sf[3], foreground= sf[4])
             os.chdir(orpa)
+            
+    def resapp(self, event = None):
+        if self.root.overrideredirect():
+            self.text.config(font = 'consolas 34 bold')
+            self.frb.pack(side = TOP, pady = 5)
+            self.root.overrideredirect(False)
+            self.root.resizable(False, True)
+        else:
+            self.text.config(font = 'consolas 37 bold')
+            self.frb.pack(pady = 25)
+            self.root.overrideredirect(True)
+            self.root.state('zoomed')
             
     def dtc(self, event = None):
         # Moving the scale of the day.
@@ -966,13 +979,12 @@ class CalGui:
 
 def main():
     #Starting the app.
-    
     if 'Caldata' in os.listdir():
         os.chdir('Caldata')
     else:
         os.mkdir('Caldata')
         os.chdir('Caldata')
-    start = CalGui()   
+    start = CalGui()
     start.root.mainloop()
     
 if __name__ == "__main__":
