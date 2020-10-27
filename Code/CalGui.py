@@ -20,10 +20,9 @@ class ChoCal:
     
     def __init__(self, year = dt.date.today().year , 
                  month =  dt.date.today().month, 
-                 day = dt.date.today().day):
+                 ):
         self.year = year
         self.month = month
-        self.day = day
         
     def createcal(self):
         cal.setfirstweekday(cal.SUNDAY)
@@ -31,11 +30,11 @@ class ChoCal:
         monthy = self.month-1
         mo = [i for i in cal.month_name if i != '']
         monthdict = { i:d for i, d in zip(mo,cm)}
-        days = cal.weekheader(2).split()
+        days = cal.weekheader(3).split()
         df = pd.DataFrame(monthdict[mo[monthy]],
         index = [f'Week {i+1}' for i in range(len(monthdict[mo[monthy]]))],
         columns= days)
-        df = df.replace(0, '')
+        df = df.replace(0, '   ')
         df.index.name = f'{mo[monthy]} {self.year}'
         return df
 
@@ -243,7 +242,7 @@ class CalGui:
         #Creating Calendar according to the scales of the years, months and days.
         
         self.label.config(font = 'verdana 30 bold')
-        cc = ChoCal(self.sc1.get(), self.sc2.get(), self.sc3.get())
+        cc = ChoCal(self.sc1.get(), self.sc2.get())
         self.sc3.config(to = cc.monrang(self.sc1.get(), self.sc2.get()))
         self.text.config(state = 'normal')
         self.text.delete('1.0', END)
@@ -979,12 +978,16 @@ class CalGui:
 
 def main():
     #Starting the app.
+    
+    start = CalGui()
+    if 'CalGui.ico' in os.listdir():
+        start.root.iconbitmap(default = 'CalGui.ico')
+    start.root.title('❤CalGui❤')
     if 'Caldata' in os.listdir():
         os.chdir('Caldata')
     else:
         os.mkdir('Caldata')
         os.chdir('Caldata')
-    start = CalGui()
     start.root.mainloop()
     
 if __name__ == "__main__":
