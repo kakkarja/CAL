@@ -979,15 +979,18 @@ class CalGui:
 def main():
     #Starting the app.
     
-    start = CalGui()
+    pth = None
     if 'CalGui.ico' in os.listdir():
-        start.root.iconbitmap(default = 'CalGui.ico')
-    start.root.title('❤CalGui❤')
+        pth = f'{os.getcwd()}\\CalGui.ico'
     if 'Caldata' in os.listdir():
         os.chdir('Caldata')
     else:
         os.mkdir('Caldata')
         os.chdir('Caldata')
+    start = CalGui()
+    if pth:
+        start.root.iconbitmap(default = pth)
+    start.root.title('❤CalGui❤')
     start.root.mainloop()
     
 if __name__ == "__main__":
