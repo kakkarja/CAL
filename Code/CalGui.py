@@ -352,7 +352,7 @@ class CalGui:
         #Set the scale to default values of year, month and day.
         
         if self.gset.get():
-            self.sc1.set(self.sd[0])    
+            self.sc1.set(self.sd[0])
             self.sc2.set(self.sd[1])
             self.sc3.set(self.sd[2])
         else:
@@ -371,9 +371,15 @@ class CalGui:
                     if self.sd:
                         ev = simpledialog.askstring('CalGui', 'Events?')
                         if ev:
-                            with open(f'{file}.txt', 'a') as wr:
-                                wr.write(f'{(self.sd, ev)}\n')
-                            self.setcb()
+                            asr = messagebox.askyesno('CalGui', 'Recurrence event?')
+                            if asr:
+                                with open(f'{file}.txt', 'a') as wr:
+                                    wr.write(f'{(self.sd[1:], ev)}\n')
+                                self.setcb()
+                            else:
+                                with open(f'{file}.txt', 'a') as wr:
+                                    wr.write(f'{(self.sd, ev)}\n')
+                                self.setcb()
                         else:
                             messagebox.showinfo('CalGui', 'Must write event!')
                     else:
@@ -382,9 +388,15 @@ class CalGui:
                     if self.sd:
                         ev = simpledialog.askstring('CalGui', 'Events?')
                         if ev:
-                            with open(f'{file}.txt', 'w') as wr:
-                                wr.write(f'{(self.sd, ev)}\n')
-                            self.setcb()
+                            asr = messagebox.askyesno('CalGui', 'Recurrence event?')
+                            if asr:                            
+                                with open(f'{file}.txt', 'w') as wr:
+                                    wr.write(f'{(self.sd[1:], ev)}\n')
+                                self.setcb()
+                            else:
+                                with open(f'{file}.txt', 'w') as wr:
+                                    wr.write(f'{(self.sd, ev)}\n')
+                                self.setcb()                                
                         else:
                             messagebox.showinfo('CalGui', 'Must write event!')
                     else:
@@ -437,11 +449,13 @@ class CalGui:
                             if self.gset.get():
                                 self.setcb()
                             self.sd = eval(lg[chdat-1][:-1])[0]
+                            if len(self.sd) != 3:
+                                self.sd.insert(0, dt.date.today().year)
+                            y, m, d = self.sd
                             self.sc3.config(to = ChoCal.monrang(self.sd[0], self.sd[1]))
                             self.gset.set(1)
                             self.sdat()
                             self.setcb()
-                            y, m, d =eval(lg[chdat-1][:-1])[0]
                             for i in self.bt:
                                 if isinstance(self.bt[i], tuple):
                                     self.bt[i][0].config(state = 'disable')
