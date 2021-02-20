@@ -77,6 +77,7 @@ class CalGui:
         self.root.bind_all('<Shift-Right>', self.dtc)
         self.root.bind_all('<Alt-Left>', self.yrc)
         self.root.bind_all('<Alt-Right>', self.yrc)
+        self.root.bind_all('<Control-i>', self.resapp)
         self.bt = {}
         self.sc1 = Scale(self.root, from_=1800, to=2300, orient = HORIZONTAL, 
                     command = self.ccal, background = 'teal', fg = 'white',
@@ -182,29 +183,32 @@ class CalGui:
                          activeforeground = 'white', highlightthickness = 0, bd = 0, font = 'verdana 10 bold')
         self.but.pack(side = LEFT)
         self.bt['but'] = self.but
-        self.root.bind_all('<Control-i>', self.resapp)
         
         if 'Calset' in os.listdir():
-            orpa = os.getcwd()
-            os.chdir('Calset')
-            if 'setnext.txt' in os.listdir():
-                with open('setnext.txt') as setfile:
+            orpa = os.path.join(os.getcwd(), 'Calset')
+            if 'setnext.txt' in os.listdir(orpa):
+                with open(os.path.join(orpa,'setnext.txt')) as setfile:
                     sf = eval(setfile.read())
                 self.text.tag_config('hg', background = sf[0], 
                                      foreground= sf[1])
                 self.label.config(foreground = sf[2])
                 self.text.config(background = sf[3], foreground= sf[4])
-            os.chdir(orpa)
             
     def resapp(self, event = None):
         if self.root.overrideredirect():
             self.text.config(font = 'consolas 34 bold')
             self.frb.pack(side = TOP, pady = 5)
             self.root.overrideredirect(False)
-            self.root.resizable(False, True)
+            self.root.resizable(True, True)
+            a = str(self.root.winfo_geometry())
+            h = int(a.partition('x')[2].partition('+')[0])
+            w = int(a.partition('x')[0])
+            self.root.minsize(w, h)
+            del a, h, w
         else:
             self.text.config(font = 'consolas 37 bold')
             self.frb.pack(pady = 25)
+            self.root.update()
             self.root.overrideredirect(True)
             self.root.state('zoomed')
             
